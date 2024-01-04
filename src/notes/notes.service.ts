@@ -45,7 +45,7 @@ export class NotesService {
     }
 
     note.title = title;
-    if (content) {
+    if (typeof content === 'string') {
       note.content = content;
     }
 
