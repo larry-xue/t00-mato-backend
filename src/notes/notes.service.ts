@@ -44,12 +44,18 @@ export class NotesService {
       return null;
     }
 
-    note.title = title;
+    if (title) {
+      note.title = title;
+    }
+
     if (typeof content === 'string') {
       note.content = content;
     }
 
-    return await this.noteRepository.save(note);
+    return await this.noteRepository.save({
+      ...note,
+      update_at: new Date(),
+    });
   }
 
   async remove(id: number) {
