@@ -47,7 +47,7 @@ export class NotesService {
     note.title = title;
     note.content = content;
 
-    return this.noteRepository.save(note);
+    return await this.noteRepository.save(note);
   }
 
   async remove(id: number) {
