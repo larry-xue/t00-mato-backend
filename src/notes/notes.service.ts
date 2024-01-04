@@ -45,7 +45,9 @@ export class NotesService {
     }
 
     note.title = title;
-    note.content = content;
+    if (content) {
+      note.content = content;
+    }
 
     return await this.noteRepository.save(note);
   }
