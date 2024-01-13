@@ -9,7 +9,7 @@ export class Time {
   title: string;
 
   @Column({ nullable: true })
-  start_time: string;
+  end_time: string;
 
   @Column('simple-array')
   connections: string[];

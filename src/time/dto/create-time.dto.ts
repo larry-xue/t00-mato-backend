@@ -5,8 +5,8 @@ export class CreateTimeDto {
   readonly title: string;
 
   @IsNumber()
-  readonly start_time: number;
-  
+  readonly end_time: number;
+
   @IsArray()
   @IsString({ each: true })
   readonly connections: string[];

@@ -21,7 +21,7 @@ export class TimeService {
   async create(createTimeDto: CreateTimeDto): Promise<Time> {
     const time = this.timeRepository.create({
       ...createTimeDto,
-      start_time: formatTime(createTimeDto.start_time),
+      end_time: formatTime(createTimeDto.end_time),
     });
     return this.timeRepository.save(time);
   }
@@ -38,7 +38,7 @@ export class TimeService {
     await this.findOne(id); // Ensure the Time exists
     await this.timeRepository.update(id, {
       ...updateTimeDto,
-      start_time: formatTime(updateTimeDto.start_time),
+      end_time: formatTime(updateTimeDto.end_time),
     });
     return this.findOne(id);
   }
