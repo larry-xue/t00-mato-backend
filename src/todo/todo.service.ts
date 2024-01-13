@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Todo } from './entities/todo.entity';
 import { Repository } from 'typeorm';
 import { Time } from 'src/time/entities/time.entity';
-import * as dayjs from 'dayjs';
-import { formatTime } from 'src/utils/time';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { UpdateRepeatDto } from './dto/update-repeat.dto';
+import { TodoOperaton } from 'src/common/constants/todo.constant';
 
 @Injectable()
 export class TodoService {
@@ -31,13 +35,7 @@ export class TodoService {
 
     return timeItem;
   }
-  create(
-    createTodoDto: CreateTodoDto,
-    pagination = {
-      page: 1,
-      pageSize: 10,
-    },
-  ) {
+  create(createTodoDto: CreateTodoDto) {
     const { connect_to } = createTodoDto;
     const timeItem = this.checkConnectTo(connect_to);
 
@@ -86,5 +84,28 @@ export class TodoService {
       throw new NotFoundException('todo not found');
     }
     await this.todoRepository.remove(todoItem);
+  }
+
+  async updateRepeat(updateRepeatDto: UpdateRepeatDto) {
+    // TODO: fix uuid validation excepion
+    const todoItem = await this.findOne(updateRepeatDto.id);
+    if (!todoItem) {
+      throw new NotFoundException('todo not found');
+    }
+
+    if (updateRepeatDto.operation === TodoOperaton.done) {
+      todoItem.success_repeat = todoItem.success_repeat + 1;
+      if (todoItem.success_repeat > todoItem.repeat) {
+        throw new BadRequestException('success_repeat > repeat');
+      }
+    } else if (updateRepeatDto.operation === TodoOperaton.fail) {
+      todoItem.fail_repeat = todoItem.fail_repeat + 1;
+      if (todoItem.fail_repeat > todoItem.repeat) {
+        throw new BadRequestException('fail_repeat > repeat');
+      }
+    }
+
+    await this.todoRepository.save(todoItem);
+    return todoItem;
   }
 }
