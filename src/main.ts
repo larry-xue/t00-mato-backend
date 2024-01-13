@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import * as dayjs from 'dayjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   app.setGlobalPrefix('api');
+
+  // set timezone
+  // TODO fix timezone
+  dayjs.locale('zh-cn');
 
   const config = new DocumentBuilder()
     .setTitle('T00Mato API')
