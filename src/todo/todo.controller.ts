@@ -6,11 +6,11 @@ import {
   Put,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Pagination } from 'src/common/decorators/pagination.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('todo')
@@ -23,7 +23,7 @@ export class TodoController {
   }
 
   @Get()
-  findAll(@Pagination() pagination: PaginationDto) {
+  findAll(@Query() pagination: PaginationDto) {
     return this.todoService.findAll(pagination);
   }
 
