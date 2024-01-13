@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
 import { UserModule } from './user/user.module';
 import { TimeModule } from './time/time.module';
+import { TodoModule } from './todo/todo.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -14,7 +15,7 @@ import { TimeModule } from './time/time.module';
     isGlobal: true,
     load: [databaseConfig],
   }),
-  TypeOrmModule.forRoot(databaseConfig()), NotesModule, UserModule, TimeModule],
+  TypeOrmModule.forRoot(databaseConfig()), NotesModule, UserModule, TimeModule, TodoModule],
   controllers: [AppController],
   providers: [AppService],
 })
