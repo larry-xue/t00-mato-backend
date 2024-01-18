@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Todo } from 'src/todo/entities/todo.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class TodoGroup {
@@ -7,4 +8,7 @@ export class TodoGroup {
 
   @Column({ default: '' })
   title: string;
+
+  @OneToMany(() => Todo, (todos) => todos.todo_group)
+  todos: number[];
 }

@@ -10,6 +10,7 @@ import {
 import { TodoGroupService } from './todo-group.service';
 import { CreateTodoGroupDto } from './dto/create-todo-group.dto';
 import { UpdateTodoGroupDto } from './dto/update-todo-group.dto';
+import { ConnectTodoGroupDto } from './dto/connect-todo-group.dto';
 
 @Controller('todo-group')
 export class TodoGroupController {
@@ -41,5 +42,10 @@ export class TodoGroupController {
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.todoGroupService.remove(id);
+  }
+
+  @Post('connect')
+  connect(@Body() connectTodoGroupDto: ConnectTodoGroupDto) {
+    return this.todoGroupService.connect(connectTodoGroupDto);
   }
 }

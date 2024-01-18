@@ -106,6 +106,16 @@ export class TodoService {
   // TODO: fix not use any
   private destructureJoinTableData(data: any) {
     const { connect_to, todo_group } = data;
+
+    if (Array.isArray(data)) {
+      return data.map((item) => {
+        return {
+          ...item,
+          connect_to: item.connect_to ? item.connect_to.id : null,
+          todo_group: item.todo_group ? item.todo_group.id : null,
+        };
+      });
+    }
     return {
       ...data,
       connect_to: connect_to ? connect_to.id : null,
@@ -203,7 +213,10 @@ export class TodoService {
       }
       if (updateRepeatDto.time) {
         // check time should less then focus_time and greater than 0
-        if (updateRepeatDto.time < todoItem.focus_time && updateRepeatDto.time > 0) {
+        if (
+          updateRepeatDto.time < todoItem.focus_time &&
+          updateRepeatDto.time > 0
+        ) {
           todoItem.total_time += updateRepeatDto.time;
         } else {
           throw new BadRequestException(

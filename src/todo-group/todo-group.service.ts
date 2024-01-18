@@ -1,15 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTodoGroupDto } from './dto/create-todo-group.dto';
 import { UpdateTodoGroupDto } from './dto/update-todo-group.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TodoGroup } from './entities/todo-group.entity';
 import { Repository } from 'typeorm';
+import { ConnectTodoGroupDto } from './dto/connect-todo-group.dto';
+import { Todo } from 'src/todo/entities/todo.entity';
 
 @Injectable()
 export class TodoGroupService {
   constructor(
     @InjectRepository(TodoGroup)
     private todoGroupRepository: Repository<TodoGroup>,
+    @InjectRepository(Todo)
+    private todoRepository: Repository<Todo>,
   ) {}
   create(createTodoGroupDto: CreateTodoGroupDto) {
     return this.todoGroupRepository.save(createTodoGroupDto);
@@ -20,7 +28,10 @@ export class TodoGroupService {
   }
 
   findOne(id: number) {
-    return this.todoGroupRepository.findOne({ where: { id } });
+    return this.todoGroupRepository.findOne({
+      where: { id },
+      relations: ['todos'],
+    });
   }
 
   async update(id: number, updateTodoGroupDto: UpdateTodoGroupDto) {
@@ -42,5 +53,28 @@ export class TodoGroupService {
       throw new NotFoundException('todoGroup not found');
     }
     await this.todoGroupRepository.remove(todoGroup);
+  }
+
+  async connect(connectTodoGroupDto: ConnectTodoGroupDto) {
+    const todoGroup = await this.findOne(connectTodoGroupDto.todo_group_id);
+    if (!todoGroup) {
+      throw new NotFoundException('todoGroup not found');
+    }
+    const todo = await this.todoRepository.findOne({
+      where: { id: connectTodoGroupDto.todo_id },
+    });
+    if (!todo) {
+      throw new NotFoundException('todo not found');
+    }
+
+    console.log('todoGroup = ', todoGroup);
+    if (todoGroup.todos?.includes(todo.id)) {
+      throw new BadRequestException('todo already connected');
+    }
+
+    todo.todo_group = todoGroup.id;
+    await this.todoRepository.save(todo);
+
+    return this.findOne(todoGroup.id);
   }
 }

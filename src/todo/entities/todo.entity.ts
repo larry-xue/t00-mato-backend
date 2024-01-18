@@ -62,7 +62,7 @@ export class Todo {
   user: User;
 
   // 关联代办集合
-  @ManyToOne(() => TodoGroup, (todoGroup) => todoGroup.id)
+  @ManyToOne(() => TodoGroup, (todoGroup) => todoGroup.todos)
   @JoinColumn([{ name: 'todo_group_id', referencedColumnName: 'id' }])
   todo_group: number;
 }
