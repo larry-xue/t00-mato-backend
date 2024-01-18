@@ -8,15 +8,23 @@ import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
 import { UserModule } from './user/user.module';
 import { TimeModule } from './time/time.module';
 import { TodoModule } from './todo/todo.module';
+import { TodoGroupModule } from './todo-group/todo-group.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    envFilePath: '.env',
-    isGlobal: true,
-    load: [databaseConfig],
-  }),
-  TypeOrmModule.forRoot(databaseConfig()), NotesModule, UserModule, TimeModule, TodoModule],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+      load: [databaseConfig],
+    }),
+    TypeOrmModule.forRoot(databaseConfig()),
+    NotesModule,
+    UserModule,
+    TimeModule,
+    TodoModule,
+    TodoGroupModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
