@@ -147,7 +147,7 @@ export class TodoService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Todo> {
     return this.destructureJoinTableData(
       await this.todoRepository
         .createQueryBuilder('todo')
@@ -182,19 +182,34 @@ export class TodoService {
     await this.todoRepository.remove(todoItem);
   }
 
-  async updateRepeat(updateRepeatDto: UpdateRepeatDto) {
+  async updateRepeat(updateRepeatDto: UpdateRepeatDto, id: number) {
     // TODO: fix uuid validation excepion
-    const todoItem = await this.findOne(updateRepeatDto.id);
+    const todoItem = await this.findOne(id);
     if (!todoItem) {
       throw new NotFoundException('todo not found');
     }
 
-    if (updateRepeatDto.operation === TodoOperaton.done) {
+    // TODO: add row in statistic table
+    // TODO: reset total time in 00:00
+    // TODO: if todo type is once, in 00:00 remove it from todo table and save it to history_todo table
+    // TODO: if todo were removed, save it to history_todo table, than delete it, for statistics corect
+    if (updateRepeatDto.type === TodoOperaton.success) {
       todoItem.success_repeat = todoItem.success_repeat + 1;
-    } else if (updateRepeatDto.operation === TodoOperaton.fail) {
+      todoItem.total_time += todoItem.focus_time;
+    } else if (updateRepeatDto.type === TodoOperaton.fail) {
       todoItem.fail_repeat = todoItem.fail_repeat + 1;
       if (todoItem.fail_repeat > todoItem.repeat) {
         throw new BadRequestException('fail_repeat > repeat');
+      }
+      if (updateRepeatDto.time) {
+        // check time should less then focus_time and greater than 0
+        if (updateRepeatDto.time < todoItem.focus_time && updateRepeatDto.time > 0) {
+          todoItem.total_time += updateRepeatDto.time;
+        } else {
+          throw new BadRequestException(
+            'time should less then focus_time and greater than 0',
+          );
+        }
       }
     }
 

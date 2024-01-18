@@ -43,8 +43,8 @@ export class TodoController {
     return this.todoService.remove(id);
   }
 
-  @Post('repeat')
-  updateRepeat(@Body() updateRepeatDto: UpdateRepeatDto) {
-    return this.todoService.updateRepeat(updateRepeatDto);
+  @Post('repeat/:id')
+  updateRepeat(@Param('id') id: number, @Body() updateRepeatDto: UpdateRepeatDto) {
+    return this.todoService.updateRepeat(updateRepeatDto, id);
   }
 }

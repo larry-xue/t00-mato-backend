@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsString } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, Min } from 'class-validator';
 import {
   TodoOperaton,
   TodoOperatonEnum,
@@ -8,9 +8,11 @@ import {
 export class UpdateRepeatDto {
   @IsIn(Object.keys(TodoOperaton))
   @ApiProperty()
-  readonly operation: TodoOperatonEnum;
+  readonly type: TodoOperatonEnum;
 
-  @IsString()
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
   @ApiProperty()
-  readonly id: number;
+  readonly time: number;
 }

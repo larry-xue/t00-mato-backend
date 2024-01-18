@@ -1,6 +1,6 @@
-export type TodoOperatonEnum = 'done' | 'fail';
+export type TodoOperatonEnum = 'success' | 'fail';
 
 export const TodoOperaton = {
-  done: 'success' as TodoOperatonEnum,
+  success: 'success' as TodoOperatonEnum,
   fail: 'fail' as TodoOperatonEnum,
 };
