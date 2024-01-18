@@ -1,9 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Todo } from 'src/todo/entities/todo.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Time {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   title: string;
@@ -11,6 +12,6 @@ export class Time {
   @Column({ nullable: true })
   end_time: string;
 
-  @Column('simple-array')
-  connections: string[];
+  @OneToMany(() => Todo, (todos) => todos.id)
+  todos: number[];
 }

@@ -27,20 +27,20 @@ export class TimeController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Time> {
+  findOne(@Param('id') id: number): Promise<Time> {
     return this.timeService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateTimeDto: UpdateTimeDto,
   ): Promise<Time> {
     return this.timeService.update(id, updateTimeDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id') id: number): Promise<void> {
     return this.timeService.remove(id);
   }
 }

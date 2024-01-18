@@ -25,7 +25,7 @@ export class TimeService {
     return this.timeRepository.save(time);
   }
 
-  async findOne(id: string): Promise<Time> {
+  async findOne(id: number): Promise<Time> {
     const time = await this.timeRepository.findOne({ where: { id } });
     if (!time) {
       throw new NotFoundException('Time not found');
@@ -33,7 +33,7 @@ export class TimeService {
     return time;
   }
 
-  async update(id: string, updateTimeDto: UpdateTimeDto): Promise<Time> {
+  async update(id: number, updateTimeDto: UpdateTimeDto): Promise<Time> {
     await this.findOne(id); // Ensure the Time exists
     await this.timeRepository.update(id, {
       ...updateTimeDto,
@@ -42,7 +42,7 @@ export class TimeService {
     return this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const time = await this.findOne(id);
     await this.timeRepository.remove(time);
   }
