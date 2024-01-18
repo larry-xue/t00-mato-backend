@@ -13,8 +13,8 @@ import {
 
 @Entity()
 export class Todo {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   title: string;
@@ -43,6 +43,10 @@ export class Todo {
   @Column({ default: 25 })
   focus_time: number;
 
+  // stand for today's total time
+  @Column({ default: 0 })
+  total_time: number;
+
   @CreateDateColumn({ type: 'timestamp without time zone' })
   create_at: Date;
 
@@ -51,7 +55,7 @@ export class Todo {
 
   @ManyToOne(() => Time, (time) => time.id)
   @JoinColumn([{ name: 'time_id', referencedColumnName: 'id' }])
-  connect_to: Time;
+  connect_to: number;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
@@ -60,5 +64,5 @@ export class Todo {
   // 关联代办集合
   @ManyToOne(() => TodoGroup, (todoGroup) => todoGroup.id)
   @JoinColumn([{ name: 'todo_group_id', referencedColumnName: 'id' }])
-  todo_group: TodoGroup;
+  todo_group: number;
 }

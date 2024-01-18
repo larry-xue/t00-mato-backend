@@ -12,5 +12,5 @@ export class UpdateRepeatDto {
 
   @IsString()
   @ApiProperty()
-  readonly id: string;
+  readonly id: number;
 }

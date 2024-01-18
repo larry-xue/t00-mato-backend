@@ -19,11 +19,11 @@ export class TodoGroupService {
     return this.todoGroupRepository.find();
   }
 
-  findOne(id: string) {
+  findOne(id: number) {
     return this.todoGroupRepository.findOne({ where: { id } });
   }
 
-  async update(id: string, updateTodoGroupDto: UpdateTodoGroupDto) {
+  async update(id: number, updateTodoGroupDto: UpdateTodoGroupDto) {
     const todoGroup = await this.findOne(id);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
@@ -36,7 +36,7 @@ export class TodoGroupService {
     return this.findOne(id);
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const todoGroup = await this.findOne(id);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
