@@ -28,10 +28,12 @@ export class TodoGroupService {
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
     }
-    return this.todoGroupRepository.update(id, {
+    await this.todoGroupRepository.update(id, {
       ...todoGroup,
       ...updateTodoGroupDto,
     });
+
+    return this.findOne(id);
   }
 
   async remove(id: string) {
