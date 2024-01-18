@@ -95,9 +95,6 @@ export class TodoService {
 
     if (updateRepeatDto.operation === TodoOperaton.done) {
       todoItem.success_repeat = todoItem.success_repeat + 1;
-      if (todoItem.success_repeat > todoItem.repeat) {
-        throw new BadRequestException('success_repeat > repeat');
-      }
     } else if (updateRepeatDto.operation === TodoOperaton.fail) {
       todoItem.fail_repeat = todoItem.fail_repeat + 1;
       if (todoItem.fail_repeat > todoItem.repeat) {
