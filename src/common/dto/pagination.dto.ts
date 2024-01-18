@@ -10,6 +10,5 @@ export class PaginationDto {
   @IsNumber()
   @ApiProperty()
   @Min(1)
-  @Max(100)
   readonly page_size: number = 10;
 }
