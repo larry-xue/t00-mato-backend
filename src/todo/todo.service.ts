@@ -178,10 +178,9 @@ export class TodoService {
     const updateInfo: any = {
       ...updateTodoDto,
     };
-    delete updateInfo.connect_to;
     delete updateInfo.todo_group_id;
 
-    if (updateInfo?.todo_group_id) {
+    if (updateTodoDto?.todo_group_id) {
       updateInfo.todo_group = updateTodoDto.todo_group_id;
     }
     if (timeItem) {

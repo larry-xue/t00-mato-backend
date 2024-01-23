@@ -1,16 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Time } from './entities/time.entity';
 import { CreateTimeDto } from './dto/create-time.dto';
 import { UpdateTimeDto } from './dto/update-time.dto';
 import { formatTime } from 'src/utils/time';
+import { Todo } from 'src/todo/entities/todo.entity';
 
 @Injectable()
 export class TimeService {
   constructor(
     @InjectRepository(Time)
     private readonly timeRepository: Repository<Time>,
+    private readonly connection: DataSource,
   ) {}
 
   async findAll(): Promise<Time[]> {
@@ -44,6 +46,25 @@ export class TimeService {
 
   async remove(id: number): Promise<void> {
     const time = await this.findOne(id);
+    if (!time) {
+      throw new NotFoundException('Time not found');
+    }
+  
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 将 time 关联的所有 todo 的 connect_to 字段置为 null
+      await queryRunner.manager.update(Todo, { connect_to: id }, { connect_to: null });
+      await queryRunner.manager.delete(Time, id);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+
     await this.timeRepository.remove(time);
   }
 }

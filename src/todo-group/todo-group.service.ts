@@ -7,9 +7,10 @@ import { CreateTodoGroupDto } from './dto/create-todo-group.dto';
 import { UpdateTodoGroupDto } from './dto/update-todo-group.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TodoGroup } from './entities/todo-group.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ConnectTodoGroupDto } from './dto/connect-todo-group.dto';
 import { Todo } from 'src/todo/entities/todo.entity';
+import { Time } from 'src/time/entities/time.entity';
 
 @Injectable()
 export class TodoGroupService {
@@ -18,6 +19,7 @@ export class TodoGroupService {
     private todoGroupRepository: Repository<TodoGroup>,
     @InjectRepository(Todo)
     private todoRepository: Repository<Todo>,
+    private readonly connection: DataSource,
   ) {}
   create(createTodoGroupDto: CreateTodoGroupDto) {
     return this.todoGroupRepository.save(createTodoGroupDto);
@@ -51,6 +53,25 @@ export class TodoGroupService {
     const todoGroup = await this.findOne(id);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
+    }
+
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 将 todoGroup 关联的所有 todo 的 todo_group 字段置为 null
+      await queryRunner.manager.update(
+        Todo,
+        { todo_group: id },
+        { todo_group: null },
+      );
+      await queryRunner.manager.delete(TodoGroup, id);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
     }
     await this.todoGroupRepository.remove(todoGroup);
   }
