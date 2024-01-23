@@ -39,8 +39,8 @@ export class TodoService {
 
     return timeItem;
   }
-  private checkTodoGroupExist(id: number) {
-    const todoItem = this.todoGroupRepository.findOne({
+  private async checkTodoGroupExist(id: number) {
+    const todoItem = await this.todoGroupRepository.findOne({
       where: { id },
     });
     if (!todoItem) {
@@ -125,13 +125,14 @@ export class TodoService {
 
   async create(createTodoDto: CreateTodoDto) {
     const { connect_to } = createTodoDto;
-    const timeItem = await this.checkConnectTo(connect_to);
+    await this.checkConnectTo(connect_to);
 
     await this.commonValidationForTodo(createTodoDto);
 
     const todo = this.todoRepository.create({
       ...createTodoDto,
-      connect_to: timeItem.id,
+      todo_group: createTodoDto?.todo_group_id || null,
+      connect_to: createTodoDto?.connect_to || null,
     });
     return this.todoRepository.save(todo);
   }
@@ -174,11 +175,25 @@ export class TodoService {
     const { connect_to } = updateTodoDto;
     const timeItem = await this.checkConnectTo(connect_to);
 
-    await this.commonValidationForTodo(updateTodoDto);
-
-    await this.todoRepository.update(id, {
+    const updateInfo: any = {
       ...updateTodoDto,
-      connect_to: timeItem.id,
+    };
+    delete updateInfo.connect_to;
+    delete updateInfo.todo_group_id;
+
+    if (updateInfo?.todo_group_id) {
+      updateInfo.todo_group = updateTodoDto.todo_group_id;
+    }
+    if (timeItem) {
+      updateInfo.connect_to = timeItem?.id;
+    }
+
+    const previousInfo = await this.findOne(id);
+
+    await this.commonValidationForTodo(updateTodoDto);
+    await this.todoRepository.update(id, {
+      ...previousInfo,
+      ...updateInfo,
     });
 
     return this.findOne(id);

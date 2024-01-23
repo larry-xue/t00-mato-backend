@@ -42,7 +42,7 @@ export class CreateTodoDto {
   readonly repeat_date: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   @ApiProperty()
   readonly todo_group_id: number;
 }
