@@ -18,6 +18,12 @@ export class UserService {
     });
   }
 
+  getUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findOne({
+      where: { email },
+    });
+  }
+
   createUser(createUserDto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create(createUserDto);
     return this.userRepository.save(user);
