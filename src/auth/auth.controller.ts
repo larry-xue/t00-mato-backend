@@ -1,13 +1,14 @@
 import { Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Request, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './auth.guard';
 import { SignInDto } from './dto/sign-in.dto';
 import { Response } from 'express';
+import { Public } from 'src/utils/custom-decorators';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
@@ -28,7 +29,6 @@ export class AuthController {
     return res.send({ message: 'Login successful' });
   }
 
-  @UseGuards(AuthGuard)
   @Get('logout')
   logout(@Res() res: Response) {
     res.clearCookie('Authentication');

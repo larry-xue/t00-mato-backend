@@ -16,6 +16,18 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: 0 })
+  sex: number;
+
+  @Column({ default: 0 })
+  age: number;
+
+  @Column({ default: '' })
+  bio: string;
+
+  @Column({ default: '' })
+  avatar: string;
+
   @OneToMany(() => Note, note => note.user)
   notes: Note[];
 }

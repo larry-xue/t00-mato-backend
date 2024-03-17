@@ -11,6 +11,9 @@ import { TodoModule } from './todo/todo.module';
 import { TodoGroupModule } from './todo-group/todo-group.module';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './config/jwt.config';
+import { AuthGuard } from './auth/auth.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -20,14 +23,25 @@ import jwtConfig from './config/jwt.config';
       load: [databaseConfig, jwtConfig],
     }),
     TypeOrmModule.forRoot(databaseConfig()),
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          global: true,
+          ...jwtConfig(),
+        };
+      },
+    }),
+    AuthModule,
     NotesModule,
     UserModule,
     TimeModule,
     TodoModule,
     TodoGroupModule,
-    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AuthGuard,
+  },],
 })
-export class AppModule {}
+export class AppModule { }
