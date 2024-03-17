@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public } from 'src/utils/custom-decorators';
 import { Request } from 'express';
+import { instanceToPlain } from 'class-transformer';
 
 @Controller('users')
 export class UserController {
@@ -16,7 +17,7 @@ export class UserController {
     const user: {
       email: string;
     } = request['user'];
-    return this.userService.getUserByEmail(user.email);
+    return this.userService.getUserByEmail(user.email).then(user => instanceToPlain(user));
   }
 
   @Get(':id')

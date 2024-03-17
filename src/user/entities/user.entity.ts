@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Note } from 'src/notes/entities/note.entity';
 import { makeUsername } from 'src/utils';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -14,6 +15,7 @@ export class User {
   email: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @Column({ default: 0 })
