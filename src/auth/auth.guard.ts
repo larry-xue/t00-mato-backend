@@ -12,7 +12,10 @@ import { IS_PUBLIC_KEY } from 'src/utils/custom-decorators';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector) { }
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -29,26 +32,23 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: jwtConfig().secret
-        }
-      );
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConfig().secret,
+      });
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = {
         username: payload.username,
-        email: payload.sub
+        email: payload.sub,
       };
     } catch (error) {
-      throw new UnauthorizedException(error)
+      throw new UnauthorizedException(error);
     }
     return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.cookie?.split('=') ?? [];
-    return type === 'Authentication' ? token : undefined;
+    const [_, token] = request.headers.Authorization?.split('Bearer') ?? [];
+    return token.trim();
   }
 }
