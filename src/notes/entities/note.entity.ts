@@ -1,5 +1,12 @@
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Note {
@@ -12,10 +19,10 @@ export class Note {
   @Column()
   content: string;
 
-  @CreateDateColumn({ type: 'timestamp without time zone' })
+  @CreateDateColumn()
   create_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp without time zone' })
+  @UpdateDateColumn()
   update_at: Date;
 
   @ManyToOne(() => User, (user) => user.notes)

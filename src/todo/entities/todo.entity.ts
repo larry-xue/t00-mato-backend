@@ -47,10 +47,10 @@ export class Todo {
   @Column({ default: 0 })
   total_time: number;
 
-  @CreateDateColumn({ type: 'timestamp without time zone' })
+  @CreateDateColumn()
   create_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp without time zone' })
+  @UpdateDateColumn()
   update_at: Date;
 
   @ManyToOne(() => Time, (time) => time.id)
