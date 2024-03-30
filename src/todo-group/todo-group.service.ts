@@ -32,7 +32,12 @@ export class TodoGroupService {
   }
 
   findAll(user: RequestUser) {
-    return this.todoGroupRepository.find();
+    return this.todoGroupRepository.find({
+      where: {
+        user: { id: user.userId },
+      },
+      relations: ['todos'],
+    });
   }
 
   findOne(id: number, user: RequestUser) {
