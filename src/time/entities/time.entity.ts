@@ -1,5 +1,6 @@
 import { Todo } from 'src/todo/entities/todo.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Time {
@@ -14,4 +15,8 @@ export class Time {
 
   @OneToMany(() => Todo, (todos) => todos.id)
   todos: number[];
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  user: User;
 }
