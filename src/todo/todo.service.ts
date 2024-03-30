@@ -105,6 +105,7 @@ export class TodoService {
 
   // TODO: fix not use any
   private destructureJoinTableData(data: any) {
+    if (!data) return null;
     const { connect_to, todo_group } = data;
 
     if (Array.isArray(data)) {
@@ -172,6 +173,11 @@ export class TodoService {
   }
 
   async update(id: number, updateTodoDto: UpdateTodoDto) {
+    const todoItem = await this.findOne(id);
+    if (!todoItem) {
+      throw new NotFoundException('todo not found');
+    }
+
     const { connect_to } = updateTodoDto;
     const timeItem = await this.checkConnectTo(connect_to);
 
@@ -207,7 +213,6 @@ export class TodoService {
   }
 
   async updateRepeat(updateRepeatDto: UpdateRepeatDto, id: number) {
-    // TODO: fix uuid validation excepion
     const todoItem = await this.findOne(id);
     if (!todoItem) {
       throw new NotFoundException('todo not found');
