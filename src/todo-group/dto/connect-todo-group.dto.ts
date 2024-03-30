@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class ConnectTodoGroupDto {
   @IsNumber()
@@ -9,4 +9,8 @@ export class ConnectTodoGroupDto {
   @IsNumber()
   @ApiProperty()
   readonly todo_group_id: number;
+
+  @IsOptional()
+  @ApiProperty()
+  readonly is_disconnect: boolean;
 }

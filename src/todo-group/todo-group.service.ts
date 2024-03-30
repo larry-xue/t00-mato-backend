@@ -10,7 +10,7 @@ import { TodoGroup } from './entities/todo-group.entity';
 import { DataSource, Repository } from 'typeorm';
 import { ConnectTodoGroupDto } from './dto/connect-todo-group.dto';
 import { Todo } from 'src/todo/entities/todo.entity';
-import { Time } from 'src/time/entities/time.entity';
+import { RequestUser } from 'src/types/express-addon';
 
 @Injectable()
 export class TodoGroupService {
@@ -20,37 +20,44 @@ export class TodoGroupService {
     @InjectRepository(Todo)
     private todoRepository: Repository<Todo>,
     private readonly connection: DataSource,
-  ) {}
-  create(createTodoGroupDto: CreateTodoGroupDto) {
-    return this.todoGroupRepository.save(createTodoGroupDto);
+  ) { }
+  create(createTodoGroupDto: CreateTodoGroupDto, user: RequestUser) {
+    const todoGroup = this.todoGroupRepository.create({
+      ...createTodoGroupDto,
+      user: {
+        id: user.userId
+      },
+    })
+    return this.todoGroupRepository.save(todoGroup);
   }
 
-  findAll() {
+  findAll(user: RequestUser) {
     return this.todoGroupRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: number, user: RequestUser) {
     return this.todoGroupRepository.findOne({
-      where: { id },
+      where: { id, user: { id: user.userId } },
       relations: ['todos'],
     });
   }
 
-  async update(id: number, updateTodoGroupDto: UpdateTodoGroupDto) {
-    const todoGroup = await this.findOne(id);
+  async update(id: number, updateTodoGroupDto: UpdateTodoGroupDto, user: RequestUser) {
+    const todoGroup = await this.findOne(id, user);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
     }
+
     await this.todoGroupRepository.update(id, {
       ...todoGroup,
       ...updateTodoGroupDto,
     });
 
-    return this.findOne(id);
+    return this.findOne(id, user);
   }
 
-  async remove(id: number) {
-    const todoGroup = await this.findOne(id);
+  async remove(id: number, user: RequestUser) {
+    const todoGroup = await this.findOne(id, user);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
     }
@@ -76,19 +83,30 @@ export class TodoGroupService {
     await this.todoGroupRepository.remove(todoGroup);
   }
 
-  async connect(connectTodoGroupDto: ConnectTodoGroupDto) {
-    const todoGroup = await this.findOne(connectTodoGroupDto.todo_group_id);
+  async connect(connectTodoGroupDto: ConnectTodoGroupDto, user: RequestUser) {
+    const todoGroup = await this.findOne(connectTodoGroupDto.todo_group_id, user);
     if (!todoGroup) {
       throw new NotFoundException('todoGroup not found');
     }
     const todo = await this.todoRepository.findOne({
-      where: { id: connectTodoGroupDto.todo_id },
+      where: { id: connectTodoGroupDto.todo_id, user: { id: user.userId } },
     });
     if (!todo) {
       throw new NotFoundException('todo not found');
     }
 
-    console.log('todoGroup = ', todoGroup);
+    if (connectTodoGroupDto.is_disconnect) {
+      if ((todoGroup.todos as any)?.map((todo: Todo) => todo.id).includes(todo.id)) {
+        todo.todo_group = null;
+        await this.todoRepository.save(todo);
+        return {
+          message: 'todo disconnected',
+        }
+      } else {
+        throw new BadRequestException('todo not yet connected');
+      }
+    }
+
     if (todoGroup.todos?.includes(todo.id)) {
       throw new BadRequestException('todo already connected');
     }
@@ -96,6 +114,6 @@ export class TodoGroupService {
     todo.todo_group = todoGroup.id;
     await this.todoRepository.save(todo);
 
-    return this.findOne(todoGroup.id);
+    return this.findOne(todoGroup.id, user);
   }
 }
