@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Note } from './entities/note.entity';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { RequestUser } from 'src/types/express-addon';
 
 @Injectable()
 export class NotesService {
@@ -12,37 +13,42 @@ export class NotesService {
     private readonly noteRepository: Repository<Note>,
   ) {}
 
-  findAll() {
-    return this.noteRepository.find();
-  }
-
-  findOne(id: number) {
-    return this.noteRepository.findOne({
-      where: { id },
+  findAll(user: RequestUser) {
+    return this.noteRepository.find({
+      where: { user: { id: user.userId } },
     });
   }
 
-  create(noteDto: CreateNoteDto) {
+  async findOne(id: number, user: RequestUser) {
+    const note = await this.noteRepository.findOne({
+      where: { id, user: { id: user.userId } },
+    });
+
+    if (!note) {
+      throw new NotFoundException(`Note ${id} not found`);
+    }
+
+    return note;
+  }
+
+  create(noteDto: CreateNoteDto, user: RequestUser) {
     const { title, content } = noteDto;
 
     const note = this.noteRepository.create({
       title,
       content,
+      user: {
+        id: user.userId,
+      },
     });
 
     return this.noteRepository.save(note);
   }
 
-  async update(id: number, noteDto: UpdateNoteDto) {
+  async update(id: number, noteDto: UpdateNoteDto, user: RequestUser) {
     const { title, content } = noteDto;
 
-    const note = await this.noteRepository.findOne({
-      where: { id },
-    });
-    if (!note) {
-      // Handle error appropriately (e.g., throw NotFoundException)
-      return null;
-    }
+    const note = await this.findOne(id, user);
 
     if (title) {
       note.title = title;
@@ -58,14 +64,8 @@ export class NotesService {
     });
   }
 
-  async remove(id: number) {
-    const note = await this.noteRepository.findOne({
-      where: { id },
-    });
-    if (!note) {
-      // Handle error appropriately (e.g., throw NotFoundException)
-      return null;
-    }
+  async remove(id: number, user: RequestUser) {
+    const note = await this.findOne(id, user);
 
     return this.noteRepository.remove(note);
   }

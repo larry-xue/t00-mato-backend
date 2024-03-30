@@ -25,6 +25,6 @@ export class Note {
   @UpdateDateColumn()
   update_at: Date;
 
-  @ManyToOne(() => User, (user) => user.notes)
+  @ManyToOne(() => User, (user) => user.id)
   user: User;
 }
