@@ -14,6 +14,7 @@ import { UpdateRepeatDto } from './dto/update-repeat.dto';
 import { TodoOperaton } from 'src/common/constants/todo.constant';
 import { TodoGroup } from 'src/todo-group/entities/todo-group.entity';
 import { RepeatType } from './types';
+import { RequestUser } from 'src/types/express-addon';
 
 @Injectable()
 export class TodoService {
@@ -24,6 +25,7 @@ export class TodoService {
     private readonly timeRepository: Repository<Time>,
     @InjectRepository(TodoGroup)
     private readonly todoGroupRepository: Repository<TodoGroup>,
+    
   ) {}
   private async checkConnectTo(id: number): Promise<Time> {
     let timeItem: Time = null;
@@ -124,7 +126,7 @@ export class TodoService {
     };
   }
 
-  async create(createTodoDto: CreateTodoDto) {
+  async create(createTodoDto: CreateTodoDto, user: RequestUser) {
     const { connect_to } = createTodoDto;
     await this.checkConnectTo(connect_to);
 
@@ -134,15 +136,18 @@ export class TodoService {
       ...createTodoDto,
       todo_group: createTodoDto?.todo_group_id || null,
       connect_to: createTodoDto?.connect_to || null,
+      user: {
+        id: user.userId,
+      },
     });
     return this.todoRepository.save(todo);
   }
 
-  async findAll(pagination: PaginationDto) {
-    // TODO: add filter of user_id and connect_id
+  async findAll(pagination: PaginationDto, user: RequestUser) {
     const todos = this.destructureJoinTableData(
       await this.todoRepository
         .createQueryBuilder('todo')
+        .andWhere('todo.user_id = :userId', { userId: user.userId })
         .skip((pagination.page - 1) * pagination.page_size)
         .take(pagination.page_size)
         .leftJoin('todo.connect_to', 'time')
@@ -152,18 +157,21 @@ export class TodoService {
         .getMany(),
     );
 
+    const list = Object.values(todos);
+
     return {
-      list: Object.values(todos),
-      total: await this.todoRepository.count(),
+      list,
+      total: list?.length || 0,
       pagination,
     };
   }
 
-  async findOne(id: number): Promise<Todo> {
+  async findOne(id: number, user: RequestUser): Promise<Todo> {
     return this.destructureJoinTableData(
       await this.todoRepository
         .createQueryBuilder('todo')
-        .where('todo.id = :id', { id })
+        .where('todo.user = :userId', { userId: user.userId })
+        .andWhere('todo.id = :id', { id })
         .leftJoin('todo.connect_to', 'time')
         .addSelect('time.id')
         .leftJoin('todo.todo_group', 'todo_group')
@@ -172,8 +180,8 @@ export class TodoService {
     );
   }
 
-  async update(id: number, updateTodoDto: UpdateTodoDto) {
-    const todoItem = await this.findOne(id);
+  async update(id: number, updateTodoDto: UpdateTodoDto, user: RequestUser) {
+    const todoItem = await this.findOne(id, user);
     if (!todoItem) {
       throw new NotFoundException('todo not found');
     }
@@ -193,7 +201,7 @@ export class TodoService {
       updateInfo.connect_to = timeItem?.id;
     }
 
-    const previousInfo = await this.findOne(id);
+    const previousInfo = await this.findOne(id, user);
 
     await this.commonValidationForTodo(updateTodoDto);
     await this.todoRepository.update(id, {
@@ -201,27 +209,23 @@ export class TodoService {
       ...updateInfo,
     });
 
-    return this.findOne(id);
+    return this.findOne(id, user);
   }
 
-  async remove(id: number) {
-    const todoItem = await this.findOne(id);
+  async remove(id: number, user: RequestUser) {
+    const todoItem = await this.findOne(id, user);
     if (!todoItem) {
       throw new NotFoundException('todo not found');
     }
     await this.todoRepository.remove(todoItem);
   }
 
-  async updateRepeat(updateRepeatDto: UpdateRepeatDto, id: number) {
-    const todoItem = await this.findOne(id);
+  async updateRepeat(updateRepeatDto: UpdateRepeatDto, id: number, user: RequestUser) {
+    const todoItem = await this.findOne(id, user);
     if (!todoItem) {
       throw new NotFoundException('todo not found');
     }
 
-    // TODO: add row in statistic table
-    // TODO: reset total time in 00:00
-    // TODO: if todo type is once, in 00:00 remove it from todo table and save it to history_todo table
-    // TODO: if todo were removed, save it to history_todo table, than delete it, for statistics corect
     if (updateRepeatDto.type === TodoOperaton.success) {
       todoItem.success_repeat = todoItem.success_repeat + 1;
       todoItem.total_time += todoItem.focus_time;
