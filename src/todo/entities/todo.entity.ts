@@ -31,6 +31,12 @@ export class Todo {
   @Column({ default: 0 })
   success_repeat: number;
 
+  @Column({ default: 0 })
+  today_success_repeat: number;
+
+  @Column({ default: 0 })
+  today_fail_repeat: number;
+
   @Column({ default: '' })
   repeat_date: string;
 
@@ -42,6 +48,9 @@ export class Todo {
 
   @Column({ default: 25 })
   focus_time: number;
+
+  @Column({ default: 0 })
+  today_total_time: number;
 
   // stand for today's total time
   @Column({ default: 0 })

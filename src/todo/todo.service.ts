@@ -25,8 +25,8 @@ export class TodoService {
     private readonly timeRepository: Repository<Time>,
     @InjectRepository(TodoGroup)
     private readonly todoGroupRepository: Repository<TodoGroup>,
-    
-  ) {}
+
+  ) { }
   private async checkConnectTo(id: number): Promise<Time> {
     let timeItem: Time = null;
     if (id) {
@@ -68,11 +68,11 @@ export class TodoService {
     // regexp check repeat_type only contains number
     if (
       repeat_date &&
-      !/^[0-7]+$/.test(repeat_date) &&
+      !/^[1-7]+$/.test(repeat_date) &&
       repeat_date.length <= 7
     ) {
       throw new BadRequestException(
-        'repeat_date is not valid, it must comtain only number from 0 to 7',
+        'repeat_date is not valid, it must comtain only number from 1 to 7',
       );
     } else {
       const repeatDateArr = repeat_date.split('');
@@ -227,10 +227,18 @@ export class TodoService {
     }
 
     if (updateRepeatDto.type === TodoOperaton.success) {
+      if (todoItem.success_repeat + 1 > todoItem.repeat) {
+        throw new BadRequestException('success_repeat > repeat');
+      }
       todoItem.success_repeat = todoItem.success_repeat + 1;
+      todoItem.today_success_repeat = todoItem.today_success_repeat + 1;
+
       todoItem.total_time += todoItem.focus_time;
+      todoItem.today_total_time += todoItem.focus_time;
     } else if (updateRepeatDto.type === TodoOperaton.fail) {
       todoItem.fail_repeat = todoItem.fail_repeat + 1;
+      todoItem.today_fail_repeat = todoItem.today_fail_repeat + 1;
+
       if (todoItem.fail_repeat > todoItem.repeat) {
         throw new BadRequestException('fail_repeat > repeat');
       }
@@ -241,6 +249,7 @@ export class TodoService {
           updateRepeatDto.time > 0
         ) {
           todoItem.total_time += updateRepeatDto.time;
+          todoItem.today_total_time += updateRepeatDto.time;
         } else {
           throw new BadRequestException(
             'time should less then focus_time and greater than 0',

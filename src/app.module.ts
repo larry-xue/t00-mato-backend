@@ -14,6 +14,7 @@ import jwtConfig from './config/jwt.config';
 import { AuthGuard } from './auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { JwtModule } from '@nestjs/jwt';
     TimeModule,
     TodoModule,
     TodoGroupModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, {
