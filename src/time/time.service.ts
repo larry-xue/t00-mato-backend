@@ -6,50 +6,96 @@ import { CreateTimeDto } from './dto/create-time.dto';
 import { UpdateTimeDto } from './dto/update-time.dto';
 import { formatTime } from 'src/utils/time';
 import { Todo } from 'src/todo/entities/todo.entity';
+import { RequestUser } from 'src/types/express-addon';
 
 @Injectable()
 export class TimeService {
   constructor(
     @InjectRepository(Time)
     private readonly timeRepository: Repository<Time>,
+    @InjectRepository(Todo)
+    private readonly todoRepository: Repository<Todo>,
     private readonly connection: DataSource,
-  ) {}
+  ) { }
 
-  async findAll(): Promise<Time[]> {
-    return this.timeRepository.find();
+  async findAll(user: RequestUser) {
+    return this.timeRepository.find({
+      where: {
+        user: { id: user.userId },
+      },
+    })
   }
 
-  async create(createTimeDto: CreateTimeDto): Promise<Time> {
+  async create(createTimeDto: CreateTimeDto, user: RequestUser): Promise<Time> {
     const time = this.timeRepository.create({
       ...createTimeDto,
       end_time: formatTime(createTimeDto.end_time),
+      user: {
+        id: user.userId
+      },
     });
     return this.timeRepository.save(time);
   }
 
-  async findOne(id: number): Promise<Time> {
-    const time = await this.timeRepository.findOne({ where: { id } });
+  async findOne(id: number, user: RequestUser): Promise<Time> {
+    const time = await this.timeRepository.findOne({
+      where: {
+        id,
+        user: { id: user.userId }
+      },
+      relations: ['todos']
+    })
+
     if (!time) {
       throw new NotFoundException('Time not found');
     }
+
     return time;
   }
 
-  async update(id: number, updateTimeDto: UpdateTimeDto): Promise<Time> {
-    await this.findOne(id); // Ensure the Time exists
+  async update(id: number, updateTimeDto: UpdateTimeDto, user: RequestUser): Promise<Time> {
+    await this.findOne(id, user); // Ensure the Time exists
+    // check all the todo exists
+    const todos = await Promise.all(
+      updateTimeDto.todos.map(
+        (id) => this.todoRepository.findOne({
+          where: {
+            id,
+            user: { id: user.userId }
+          },
+        }
+        )
+      )
+    );
+
+    if (todos.includes(null)) {
+      const idx = todos.indexOf(null);
+      throw new NotFoundException(`todo_id ${updateTimeDto.todos[idx]} not found`);
+    }
+
+    await Promise.all(
+      todos.map((todo) => {
+        todo.connect_to = id;
+        return todo;
+      })).then(
+        todos => todos.forEach(
+          todo => this.todoRepository.save(todo)
+        )
+      );
+
     await this.timeRepository.update(id, {
-      ...updateTimeDto,
+      title: updateTimeDto.title,
       end_time: formatTime(updateTimeDto.end_time),
     });
-    return this.findOne(id);
+    return this.findOne(id, user);
   }
 
-  async remove(id: number): Promise<void> {
-    const time = await this.findOne(id);
+  async remove(id: number, user: RequestUser): Promise<void> {
+    const time = await this.findOne(id, user);
     if (!time) {
       throw new NotFoundException('Time not found');
     }
-  
+
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

@@ -13,7 +13,8 @@ export class Time {
   @Column({ nullable: true })
   end_time: string;
 
-  @OneToMany(() => Todo, (todos) => todos.id)
+  // !!!! todos.connect_to
+  @OneToMany(() => Todo, (todos) => todos.connect_to)
   todos: number[];
 
   @ManyToOne(() => User, (user) => user.id)

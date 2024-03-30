@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, IsNumber } from 'class-validator';
+import { IsString, IsNumber } from 'class-validator';
 
 export class CreateTimeDto {
   @IsString()
@@ -9,9 +9,4 @@ export class CreateTimeDto {
   @IsNumber()
   @ApiProperty()
   readonly end_time: number;
-
-  @IsArray()
-  @IsString({ each: true })
-  @ApiProperty()
-  readonly connections: string[];
 }
