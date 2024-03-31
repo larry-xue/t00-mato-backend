@@ -239,9 +239,9 @@ export class TodoService {
       todoItem.fail_repeat = todoItem.fail_repeat + 1;
       todoItem.today_fail_repeat = todoItem.today_fail_repeat + 1;
 
-      if (todoItem.fail_repeat > todoItem.repeat) {
-        throw new BadRequestException('fail_repeat > repeat');
-      }
+      // if (todoItem.fail_repeat > todoItem.repeat) {
+      //   throw new BadRequestException('fail_repeat > repeat');
+      // }
       if (updateRepeatDto.time) {
         // check time should less then focus_time and greater than 0
         if (
