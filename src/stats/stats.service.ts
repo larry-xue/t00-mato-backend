@@ -90,10 +90,10 @@ export class StatsService {
 
     // for each hour, calculate focus times and focus time
     allTodos.forEach((todo) => {
-      const hour = todo.create_at.getHours();
+      const hour = todo.update_at.getHours();
       const index = focusMap[hour];
       index.times += 1;
-      index.time += todo.focus_time;
+      index.time += todo.total_time;
     });
 
     // 将统计结果转换为响应格式
