@@ -15,6 +15,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { StatsModule } from './stats/stats.module';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -39,11 +40,12 @@ import { StatsModule } from './stats/stats.module';
     TodoModule,
     TodoGroupModule,
     StatsModule,
+    CronModule
   ],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: AuthGuard,
-  },],
+  }],
 })
 export class AppModule { }
