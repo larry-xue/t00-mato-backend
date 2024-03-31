@@ -23,6 +23,7 @@ export class TimeService {
       where: {
         user: { id: user.userId },
       },
+      relations: ['todos'],
     })
   }
 
