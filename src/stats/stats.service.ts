@@ -30,7 +30,7 @@ export class StatsService {
 
     // calculate cumulate focus times
     const cumulateFocusTimes = allTodos.reduce((sum, todo) => sum + todo.success_repeat, 0);
-    const totalTime = todayTodos.reduce((sum, todo) => sum + todo.total_time, 0);
+    const totalTime = allTodos.reduce((sum, todo) => sum + todo.total_time, 0);
     const todayTotalTime = todayTodos.reduce((sum, todo) => sum + todo.today_total_time, 0);
     const todayFocusTimes = todayTodos.reduce((sum, todo) => sum + todo.today_success_repeat, 0);
     const todayFailedTimes = todayTodos.reduce((sum, todo) => sum + todo.today_fail_repeat, 0);
