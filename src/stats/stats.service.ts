@@ -117,7 +117,7 @@ export class StatsService {
     const startDate = new Date(start_date);
 
     const firstDayOfMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    const lastDayOfMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+    const lastDayOfMonth = new Date((new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1)).getTime() - 1000);
 
     // generate days
     const days = [];
@@ -131,7 +131,7 @@ export class StatsService {
       .select()
       .where({ user: { id: user.userId } })
       .andWhere('create_at >= :start_date', { start_date: firstDayOfMonth })
-      .andWhere('create_at <= :end_date', { end_date: lastDayOfMonth })
+      .andWhere('update_at <= :end_date', { end_date: lastDayOfMonth })
       .getMany();
 
     // init timeMap
